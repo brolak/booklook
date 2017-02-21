@@ -8,10 +8,21 @@ var fetch = function (isbn) {
     dataType: "json",
     success: function(data) {
       $books.empty();
-      $books.append("<h1>"+data.items[0].volumeInfo.title+"</h1>");
-      $books.append("<p>"+data.items[0].volumeInfo.description+"</p>");
-      $books.append("<h3>"+data.items[0].volumeInfo.authors[0]+"</h3>");
-      $books.append("<img src="+data.items[0].volumeInfo.imageLinks.thumbnail+"/>");
+      // turn our "template" into html and compile
+      var source = $('#book-template').html();
+      var template = Handlebars.compile(source);
+
+      // fill our template with information
+      var newHTML = template({
+        Title: data.items[0].volumeInfo.title,
+        Description: data.items[0].volumeInfo.description,
+        Author: data.items[0].volumeInfo.authors[0],
+        Image: data.items[0].volumeInfo.imageLinks.thumbnail
+      });
+
+      // append our new html to the page
+      $(".books").append(newHTML);
+      //clear text field
       $isbn.val('');
     },
     error: function(jqXHR, textStatus, errorThrown) {
@@ -20,6 +31,7 @@ var fetch = function (isbn) {
   });
 };
 
+//fetch AJAX on click using content of text box is argument
 $(".btn").on("click",function () {
   fetch($isbn.val());
 });
