@@ -1,29 +1,32 @@
 $books = $(".books");
-$isbn = $("#book-name");
+$search = $("#book-name");
 
-var fetch = function (isbn) {
+var fetch = function (searchword) {
   $.ajax({
     method: "GET",
-    url: "https://www.googleapis.com/books/v1/volumes?q=isbn:"+isbn,
+    url: "https://www.googleapis.com/books/v1/volumes?q="+searchword,
     dataType: "json",
     success: function(data) {
+      console.log(data);
       $books.empty();
       // turn our "template" into html and compile
       var source = $('#book-template').html();
       var template = Handlebars.compile(source);
 
+      for(i=0;i<data.items.length;i++) {
+      		var newHTML = template({
+        	Title: data.items[i].volumeInfo.title,
+        	Description: data.items[i].volumeInfo.description,
+        	Author: data.items[i].volumeInfo.authors[0],
+        	Image: data.items[i].volumeInfo.imageLinks.thumbnail
+      	});
+		$(".books").append(newHTML);
+      }
       // fill our template with information
-      var newHTML = template({
-        Title: data.items[0].volumeInfo.title,
-        Description: data.items[0].volumeInfo.description,
-        Author: data.items[0].volumeInfo.authors[0],
-        Image: data.items[0].volumeInfo.imageLinks.thumbnail
-      });
-
+      
+	$search.val('');
       // append our new html to the page
-      $(".books").append(newHTML);
-      //clear text field
-      $isbn.val('');
+      
     },
     error: function(jqXHR, textStatus, errorThrown) {
       console.log(textStatus);
@@ -33,5 +36,5 @@ var fetch = function (isbn) {
 
 //fetch AJAX on click using content of text box is argument
 $(".btn").on("click",function () {
-  fetch($isbn.val());
+  fetch($search.val());
 });
